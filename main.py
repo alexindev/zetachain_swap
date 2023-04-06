@@ -5,20 +5,19 @@ from config import ABI_ZETA, ABI_SWAP, RPC
 
 
 class Swaper:
-    def __init__(self, provider: str):
+    def __init__(self, provider: str, privatekey):
         self.provider = provider
         self.w3 = Web3(Web3.HTTPProvider(provider))
         self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
         self.token = self.w3.to_checksum_address('0x000080383847bD75F91c168269Aa74004877592f')
         self.bsc_swap = self.w3.to_checksum_address('0xa0b5Cbdc4D14c4f4D36483EC0dE310919F3B2d90')
         self.polygon_swap = self.w3.to_checksum_address('0xaf28cb0d9e045170e1642321b964740784e7dc64')
-        self.privatekey = None
+        self.privatekey = privatekey
         self.address = None
 
-    def get_balance(self, wallet: str) -> bool:
+    def get_balance(self) -> bool:
         try:
-            self.privatekey = wallet
-            self.address = self.w3.eth.account.from_key(wallet).address
+            self.address = self.w3.eth.account.from_key(self.privatekey).address
             contract = self.w3.eth.contract(self.token, abi=ABI_ZETA)
 
             if self.w3.from_wei(contract.functions.balanceOf(self.address).call(), 'ether') < 3:
@@ -122,8 +121,8 @@ if __name__ == '__main__':
 
     for key in keys:
         for i in RPC:
-            swaper = Swaper(i)
-            if swaper.get_balance(key):
+            swaper = Swaper(i, key)
+            if swaper.get_balance():
                 if swaper.approve():
                     if swaper.swap():
                         break
