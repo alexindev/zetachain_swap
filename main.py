@@ -5,7 +5,7 @@ from config import ABI_ZETA, ABI_SWAP, RPC
 
 
 class Swaper:
-    def __init__(self, provider: str, privatekey):
+    def __init__(self, provider: str, privatekey: str):
         self.provider = provider
         self.w3 = Web3(Web3.HTTPProvider(provider))
         self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
